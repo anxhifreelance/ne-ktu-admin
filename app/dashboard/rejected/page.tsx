@@ -20,7 +20,15 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import { CheckCircle, Clock, Mail, MapPin, Phone, User } from "lucide-react";
+import {
+  Ban,
+  CheckCircle,
+  Clock,
+  Mail,
+  MapPin,
+  Phone,
+  User,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface Business {
@@ -36,12 +44,12 @@ interface Business {
   status: "pending" | "accepted" | "rejected";
 }
 
-export default function PendingBusinessesPage() {
+export default function RejectedBusinessesPage() {
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, "users"), where("status", "==", "pending"));
+    const q = query(collection(db, "users"), where("status", "==", "rejected"));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const businessData = snapshot.docs.map((doc) => ({
@@ -56,40 +64,20 @@ export default function PendingBusinessesPage() {
     return () => unsubscribe();
   }, []);
 
-  const handleAcceptBusiness = async (businessId: string) => {
+  const handleReconsiderBusiness = async (businessId: string) => {
     try {
       await updateDoc(doc(db, "users", businessId), {
-        status: "accepted",
+        status: "pending",
       });
 
       toast({
-        title: "Business Accepted",
-        description:
-          "The business has been successfully accepted and moved to the accepted list.",
+        title: "Business Reconsidered",
+        description: "The business has been moved back to pending review.",
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to accept the business. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleRejectBusiness = async (businessId: string) => {
-    try {
-      await updateDoc(doc(db, "users", businessId), {
-        status: "rejected",
-      });
-
-      toast({
-        title: "Business Rejected",
-        description: "The business application has been rejected.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to reject the business. Please try again.",
+        description: "Failed to reconsider the business. Please try again.",
         variant: "destructive",
       });
     }
@@ -100,10 +88,10 @@ export default function PendingBusinessesPage() {
       <div className="p-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900">
-            Pending Businesses
+            Rejected Businesses
           </h1>
           <p className="text-gray-600">
-            Review and approve business applications
+            View and manage rejected business applications
           </p>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -129,14 +117,16 @@ export default function PendingBusinessesPage() {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Pending Businesses</h1>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Rejected Businesses
+        </h1>
         <p className="text-gray-600">
-          Review and approve business applications
+          View and manage rejected business applications
         </p>
         <div className="mt-2 flex items-center gap-2">
           <Badge variant="secondary" className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            {businesses.length} Pending
+            <Ban className="h-3 w-3" />
+            {businesses.length} Rejected
           </Badge>
         </div>
       </div>
@@ -146,10 +136,10 @@ export default function PendingBusinessesPage() {
           <CardContent className="flex flex-col items-center justify-center py-12">
             <CheckCircle className="h-12 w-12 text-green-500 mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              All caught up!
+              No Rejected Businesses
             </h3>
             <p className="text-gray-600 text-center">
-              No pending business applications at the moment.
+              There are no rejected business applications at the moment.
             </p>
           </CardContent>
         </Card>
@@ -173,9 +163,9 @@ export default function PendingBusinessesPage() {
                   </div>
                   <Badge
                     variant="outline"
-                    className="text-orange-600 border-orange-200"
+                    className="text-red-600 border-red-200"
                   >
-                    Pending
+                    Rejected
                   </Badge>
                 </div>
               </CardHeader>
@@ -199,20 +189,13 @@ export default function PendingBusinessesPage() {
 
                 <div className="flex gap-2">
                   <Button
-                    onClick={() => handleAcceptBusiness(business.id)}
-                    className="flex-1"
-                    size="sm"
-                  >
-                    <CheckCircle className="h-4 w-4 mr-1" />
-                    Accept
-                  </Button>
-                  <Button
-                    onClick={() => handleRejectBusiness(business.id)}
+                    onClick={() => handleReconsiderBusiness(business.id)}
                     variant="outline"
                     size="sm"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="flex-1"
                   >
-                    Reject
+                    <Clock className="h-4 w-4 mr-1" />
+                    Reconsider
                   </Button>
                 </div>
               </CardContent>

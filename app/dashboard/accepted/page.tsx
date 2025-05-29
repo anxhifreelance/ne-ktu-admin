@@ -1,67 +1,84 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { collection, query, where, onSnapshot } from "firebase/firestore"
-import { db } from "@/lib/firebase"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { Input } from "@/components/ui/input"
-import { CheckCircle, Mail, Phone, MapPin, Building, User, Calendar, Search } from "lucide-react"
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { db } from "@/lib/firebase";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import {
+  Building,
+  CheckCircle,
+  Mail,
+  MapPin,
+  Phone,
+  Search,
+  User,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface Business {
-  id: string
-  name: string
-  email: string
-  phone: string
-  address: string
-  category: string
-  description: string
-  contactPerson: string
-  registrationDate: string
-  acceptedDate: string
-  status: "pending" | "accepted"
+  id: string;
+  businessName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  firstName: string;
+  lastName: string;
+  avatar: string;
+  role: string;
+  status: "pending" | "accepted";
 }
 
 export default function AcceptedBusinessesPage() {
-  const [businesses, setBusinesses] = useState<Business[]>([])
-  const [filteredBusinesses, setFilteredBusinesses] = useState<Business[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState("")
+  const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [filteredBusinesses, setFilteredBusinesses] = useState<Business[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const q = query(collection(db, "businesses"), where("status", "==", "accepted"))
+    const q = query(collection(db, "users"), where("status", "==", "accepted"));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const businessData = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      })) as Business[]
+      })) as Business[];
 
-      setBusinesses(businessData)
-      setFilteredBusinesses(businessData)
-      setLoading(false)
-    })
+      setBusinesses(businessData);
+      setFilteredBusinesses(businessData);
+      setLoading(false);
+    });
 
-    return () => unsubscribe()
-  }, [])
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const filtered = businesses.filter(
       (business) =>
-        business.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        business.businessName
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
         business.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        business.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        business.contactPerson.toLowerCase().includes(searchTerm.toLowerCase()),
-    )
-    setFilteredBusinesses(filtered)
-  }, [searchTerm, businesses])
+        `${business.firstName} ${business.lastName}`
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+    );
+    setFilteredBusinesses(filtered);
+  }, [searchTerm, businesses]);
 
   if (loading) {
     return (
       <div className="p-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Accepted Businesses</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Accepted Businesses
+          </h1>
           <p className="text-gray-600">View all approved business accounts</p>
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -81,13 +98,15 @@ export default function AcceptedBusinessesPage() {
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Accepted Businesses</h1>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Accepted Businesses
+        </h1>
         <p className="text-gray-600">View all approved business accounts</p>
         <div className="mt-4 flex items-center gap-4">
           <Badge variant="secondary" className="flex items-center gap-1">
@@ -112,14 +131,22 @@ export default function AcceptedBusinessesPage() {
             {searchTerm ? (
               <>
                 <Search className="h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No results found</h3>
-                <p className="text-gray-600 text-center">No businesses match your search criteria.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No results found
+                </h3>
+                <p className="text-gray-600 text-center">
+                  No businesses match your search criteria.
+                </p>
               </>
             ) : (
               <>
                 <Building className="h-12 w-12 text-gray-400 mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No accepted businesses</h3>
-                <p className="text-gray-600 text-center">No businesses have been accepted yet.</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  No accepted businesses
+                </h3>
+                <p className="text-gray-600 text-center">
+                  No businesses have been accepted yet.
+                </p>
               </>
             )}
           </CardContent>
@@ -127,60 +154,46 @@ export default function AcceptedBusinessesPage() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredBusinesses.map((business) => (
-            <Card key={business.id} className="hover:shadow-md transition-shadow">
+            <Card
+              key={business.id}
+              className="hover:shadow-md transition-shadow"
+            >
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="text-lg">{business.name}</CardTitle>
+                    <CardTitle className="text-lg">
+                      {business.businessName}
+                    </CardTitle>
                     <CardDescription className="flex items-center gap-1 mt-1">
-                      <Building className="h-3 w-3" />
-                      {business.category}
+                      <User className="h-3 w-3" />
+                      {business.firstName} {business.lastName}
                     </CardDescription>
                   </div>
-                  <Badge className="bg-green-100 text-green-800 border-green-200">Accepted</Badge>
+                  <Badge className="bg-green-100 text-green-800 border-green-200">
+                    Accepted
+                  </Badge>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <User className="h-4 w-4" />
-                    <span>{business.contactPerson}</span>
-                  </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <Mail className="h-4 w-4" />
                     <span className="truncate">{business.email}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <Phone className="h-4 w-4" />
-                    <span>{business.phone}</span>
+                    <span>{business.phoneNumber}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <MapPin className="h-4 w-4" />
                     <span className="truncate">{business.address}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Calendar className="h-4 w-4" />
-                    <span>Registered: {new Date(business.registrationDate).toLocaleDateString()}</span>
-                  </div>
-                  {business.acceptedDate && (
-                    <div className="flex items-center gap-2 text-green-600">
-                      <CheckCircle className="h-4 w-4" />
-                      <span>Accepted: {new Date(business.acceptedDate).toLocaleDateString()}</span>
-                    </div>
-                  )}
                 </div>
-
-                {business.description && (
-                  <>
-                    <Separator />
-                    <p className="text-sm text-gray-600 line-clamp-3">{business.description}</p>
-                  </>
-                )}
               </CardContent>
             </Card>
           ))}
         </div>
       )}
     </div>
-  )
+  );
 }
