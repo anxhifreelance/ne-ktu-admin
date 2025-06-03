@@ -10,7 +10,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
-const navigation = [
+const businessNavigation = [
   {
     name: "Pending Businesses",
     href: "/dashboard/pending",
@@ -31,6 +31,27 @@ const navigation = [
   },
 ];
 
+const sponsoredPostsNavigation = [
+  {
+    name: "Pending Posts",
+    href: "/dashboard/sponsored-posts/pending",
+    icon: Clock,
+    description: "Review pending sponsored posts",
+  },
+  {
+    name: "Approved Posts",
+    href: "/dashboard/sponsored-posts/approved",
+    icon: CheckCircle,
+    description: "View approved sponsored posts",
+  },
+  {
+    name: "Rejected Posts",
+    href: "/dashboard/sponsored-posts/rejected",
+    icon: Ban,
+    description: "View rejected sponsored posts",
+  },
+];
+
 export default function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -45,6 +66,42 @@ export default function DashboardSidebar() {
     }
   };
 
+  const NavSection = ({
+    title,
+    items,
+  }: {
+    title: string;
+    items: typeof businessNavigation;
+  }) => (
+    <div className="space-y-2">
+      <h2 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+        {title}
+      </h2>
+      {items.map((item) => {
+        const isActive = pathname === item.href;
+        return (
+          <Link
+            key={item.name}
+            href={item.href}
+            onClick={() => setIsMobileMenuOpen(false)}
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              isActive
+                ? "bg-blue-100 text-blue-700"
+                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+            )}
+          >
+            <item.icon className="h-4 w-4" />
+            <div>
+              <div>{item.name}</div>
+              <div className="text-xs text-gray-500">{item.description}</div>
+            </div>
+          </Link>
+        );
+      })}
+    </div>
+  );
+
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       <div className="p-6">
@@ -58,31 +115,12 @@ export default function DashboardSidebar() {
           </div>
         </div>
 
-        <nav className="space-y-2">
-          {navigation.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-blue-100 text-blue-700"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                )}
-              >
-                <item.icon className="h-4 w-4" />
-                <div>
-                  <div>{item.name}</div>
-                  <div className="text-xs text-gray-500">
-                    {item.description}
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+        <nav className="space-y-6">
+          <NavSection title="Businesses" items={businessNavigation} />
+          <NavSection
+            title="Sponsored Posts"
+            items={sponsoredPostsNavigation}
+          />
         </nav>
       </div>
 
